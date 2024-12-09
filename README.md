@@ -1,4 +1,5 @@
 === Periodic Payment Calculator Plugin ===
+
 Contributors: [Your Name]  
 Tags: payments, financing, loan calculator  
 Requires at least: 5.6  
