@@ -84,4 +84,5 @@ A: Navigate to **Term & Amortization** and update the table as needed.
 A: Yes, modify `style.css` for custom styling.
 
 == Support ==
+
 For support, please contact [Your Support Email or Website].
