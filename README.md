@@ -68,6 +68,7 @@ The Periodic Payment Calculator Plugin is a powerful tool designed for RV financ
 - Edit `style.css` in the plugin folder to style the frontend display.
 
 == Changelog ==
+
 = 1.0.0 =
 * Initial release with backend settings and frontend shortcodes.
 
