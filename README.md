@@ -49,6 +49,9 @@ The Periodic Payment Calculator Plugin is a powerful tool designed for RV financ
      - Taxed Fee (tax-inclusive fee for financing).  
 
 ### Frontend Shortcodes:
+- `[rv_financing_calculator]`  
+  Displays a detailed loan calculator for RV financing, allowing users to calculate payments based on term, rate, and other parameters.
+
 - `[payment]`  
   Display biweekly payments only.  
 
