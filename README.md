@@ -11,9 +11,11 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 This plugin enables dynamic periodic payment calculations for RV financing, with customizable settings and frontend shortcodes for user interaction.
 
 == Description ==
+
 The Periodic Payment Calculator Plugin is a powerful tool designed for RV financing solutions. It allows administrators to configure amortization terms, meta settings, and RV type fees in the backend while providing simple shortcodes for frontend integration.
 
 == Installation ==
+
 1. Upload the plugin folder to the `/wp-content/plugins/` directory.  
 2. Activate the plugin through the 'Plugins' menu in WordPress.  
 3. Navigate to **Dashboard > Periodic Payment Settings** to configure settings.  
