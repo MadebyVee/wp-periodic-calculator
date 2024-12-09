@@ -1,97 +1,60 @@
 <?php
-
-function rvc_financing_setup_menu() {
-    add_menu_page( 'RVC Financing Settings', 'Financing Settings', 'manage_options', 'rvc-financing', 'rvc_financing_init', 'dashicons-money-alt' );
-    // Add submenu item for amortization settings
-    add_submenu_page( 'rvc-financing', 'Amortization Settings', 'Amortization', 'manage_options', 'rvc-amortization', 'rvc_amortization_settings_page' );
-}
-add_action('admin_menu', 'rvc_financing_setup_menu');
+// settings.php
 
 // Initialize the plugin settings page content
 function rvc_financing_init() {
     ?>
     <div class="wrap">
-        <h2>Financing Settings</h2>
-        <form method="post" action="options.php">
+        <h2>Periodic Payment Settings</h2>
+        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
             <?php
-            settings_fields('rvc-financing-settings');
-            do_settings_sections('rvc-financing');
-            submit_button();
+            wp_nonce_field('rvc-financing-settings');
             ?>
+            <table class="form-table">
+                <?php
+                global $wpdb;
+                $settings_table = $wpdb->prefix . 'rvcpc_settings';
+                $settings = $wpdb->get_results("SELECT * FROM $settings_table");
+                foreach ($settings as $setting) {
+                    ?>
+                    <tr>
+                        <th scope="row"><label for="rvc_financing_<?php echo esc_attr($setting->setting_key); ?>"><?php echo esc_html($setting->setting_key); ?></label></th>
+                        <td>
+                            <?php if ($setting->setting_type == 'percentage') { ?>
+                                <input type="number" id="rvc_financing_<?php echo esc_attr($setting->setting_key); ?>" name="rvc_financing_settings[<?php echo esc_attr($setting->setting_key); ?>]" value="<?php echo esc_attr($setting->setting_value); ?>" step="0.01" />
+                            <?php } else { ?>
+                                <input type="text" id="rvc_financing_<?php echo esc_attr($setting->setting_key); ?>" name="rvc_financing_settings[<?php echo esc_attr($setting->setting_key); ?>]" value="<?php echo esc_attr($setting->setting_value); ?>" />
+                            <?php } ?>
+                            <p class="description"><?php echo esc_html($setting->description); ?></p>
+                        </td>
+                    </tr>
+                    <?php
+                }
+                ?>
+            </table>
+            <?php submit_button(); ?>
+            <input type="hidden" name="action" value="rvc_financing_save_settings" />
         </form>
     </div>
     <?php
 }
 
-// Register and define the settings
-add_action('admin_init', 'rvc_financing_settings');
-function rvc_financing_settings() {
-    register_setting('rvc-financing-settings', 'rvc_financing_apr', array(
-        'type' => 'float',
-        'sanitize_callback' => 'floatval',
-        'default' => 8.99
-    ));
-    register_setting('rvc-financing-settings', 'rvc_financing_tax', array(
-        'type' => 'float',
-        'sanitize_callback' => 'floatval',
-        'default' => 5.00
-    ));
-    register_setting('rvc-financing-settings', 'rvc_financing_regular_price_meta', array(
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'default' => 'regular_price_meta'
-    ));
-    register_setting('rvc-financing-settings', 'rvc_financing_dealer_price_meta', array(
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'default' => 'dealer_price_meta'
-    ));
-    register_setting('rvc-financing-settings', 'rvc_financing_sale_price_meta', array(
-        'type' => 'string',
-        'sanitize_callback' => 'sanitize_text_field',
-        'default' => 'sale_price_meta'
-    ));
-
-    add_settings_section('rvc_financing_main', 'Main Settings', 'rvc_financing_section_text', 'rvc-financing');
-
-    add_settings_field('rvc_financing_apr', 'APR %', 'rvc_financing_setting_apr', 'rvc-financing', 'rvc_financing_main');
-    add_settings_field('rvc_financing_tax', 'Tax Rate', 'rvc_financing_setting_tax', 'rvc-financing', 'rvc_financing_main');
-    add_settings_field('rvc_financing_regular_price_meta', 'Regular Price Meta', 'rvc_financing_setting_regular_price_meta', 'rvc-financing', 'rvc_financing_main');
-    add_settings_field('rvc_financing_dealer_price_meta', 'Dealer Price Meta', 'rvc_financing_setting_dealer_price_meta', 'rvc-financing', 'rvc_financing_main');
-    add_settings_field('rvc_financing_sale_price_meta', 'Sale Price Meta', 'rvc_financing_setting_sale_price_meta', 'rvc-financing', 'rvc_financing_main');
+// Save settings to database
+function rvc_financing_save_settings() {
+    global $wpdb;
+    $settings_table = $wpdb->prefix . 'rvcpc_settings';
+    $settings = $wpdb->get_results("SELECT * FROM $settings_table");
+    $new_settings = $_POST['rvc_financing_settings'];
+    foreach ($settings as $setting) {
+        if (isset($new_settings[$setting->setting_key])) {
+            $wpdb->update($settings_table, array('setting_value' => $new_settings[$setting->setting_key]), array('setting_key' => $setting->setting_key));
+        }
+    }
+    ?>
+    <script>
+        window.location.href = '<?php echo admin_url('admin.php?page=rvc-financing-settings'); ?>';
+    </script>
+    <?php
+    exit;
 }
-
-function rvc_financing_section_text() {
-    echo '<p>
-    
-    Manage pricing and tax settings effortlessly with this plugin.</p>
-    <p>
-    Set your APR, Tax rates and designate meta fields.
-    </p>';
-}
-
-function rvc_financing_setting_apr() {
-    $apr = esc_attr(get_option('rvc_financing_apr'));
-    echo "<input type='number' name='rvc_financing_apr' value='$apr' step='0.01' />";
-}
-
-function rvc_financing_setting_tax() {
-    $tax = esc_attr(get_option('rvc_financing_tax'));
-    echo "<input type='number' name='rvc_financing_tax' value='$tax' step='0.01' />";
-}
-
-function rvc_financing_setting_regular_price_meta() {
-    $regular = esc_attr(get_option('rvc_financing_regular_price_meta'));
-    echo "<input type='text' name='rvc_financing_regular_price_meta' value='$regular' />";
-}
-
-function rvc_financing_setting_dealer_price_meta() {
-    $dealer = esc_attr(get_option('rvc_financing_dealer_price_meta'));
-    echo "<input type='text' name='rvc_financing_dealer_price_meta' value='$dealer' />";
-}
-
-function rvc_financing_setting_sale_price_meta() {
-    $sale = esc_attr(get_option('rvc_financing_sale_price_meta'));
-    echo "<input type='text' name='rvc_financing_sale_price_meta' value='$sale' />";
-}
-?>
+add_action('admin_post_rvc_financing_save_settings', 'rvc_financing_save_settings');
